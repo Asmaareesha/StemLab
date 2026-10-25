@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STEMLab: interactive science experiments</title>
+<meta name="author" content="Asma Areesha Hanifi">
+<meta name="description" content="A collection of interactive science experiments designed to make difficult concepts easier to understand. Made by Asma Areesha Hanifi.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap">
+<style>
+:root{--bg:#f4f8fb;--ink:#1c2a44;--mute:#5a6b86;--card:#fff;--line:#c9d9e6;--a:#d6336c;--b:#0b8a8f;--hl:#ffe066;--ok:#1b8a4b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101826;--ink:#e8eef7;--mute:#93a4bf;--card:#172234;--line:#2b3b55;--a:#ff6b9a;--b:#4fd1c5;--hl:#ffd43b;--ok:#5fd38d}}
+:root[data-theme="dark"]{--bg:#101826;--ink:#e8eef7;--mute:#93a4bf;--card:#172234;--line:#2b3b55;--a:#ff6b9a;--b:#4fd1c5;--hl:#ffd43b;--ok:#5fd38d}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;color:var(--ink);font:16px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;background:var(--bg) linear-gradient(90deg,rgba(120,150,190,.13) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(rgba(120,150,190,.13) 1px,transparent 1px) 0 0/28px 28px}
+.app{max-width:1100px;margin:0 auto;padding:26px 16px 44px}
+h1{font:800 clamp(40px,8vw,76px)/.95 "Bricolage Grotesque",Georgia,sans-serif;margin:0;letter-spacing:-.03em}
+h1 mark{background:var(--hl);color:inherit;padding:0 .08em;border-radius:3px;transform:rotate(-1.5deg);display:inline-block}
+.tag{max-width:52ch;margin:10px 0 20px;color:var(--mute);font-size:18px}
+h2,h3{font-family:"Bricolage Grotesque",Georgia,sans-serif;margin:0 0 6px;letter-spacing:-.01em}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+button{font:inherit;cursor:pointer;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:7px 14px}
+button:hover{border-color:var(--b)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--b);outline-offset:2px}
+nav button{font-weight:700}nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+section{display:none}section.on{display:block}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;align-items:start}
+@media(max-width:860px){.lab{grid-template-columns:1fr}}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px}
+canvas{display:block;width:100%;touch-action:none}
+.col{display:grid;gap:14px}
+label{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin-top:10px}
+label output{font-variant-numeric:tabular-nums;color:var(--a)}
+input[type=range]{width:100%;accent-color:var(--a);margin:2px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:15px;margin-top:8px}.kv b{font-variant-numeric:tabular-nums}
+.try{border-left:5px solid var(--hl);padding:2px 0 2px 12px;margin-top:6px}
+.try p{margin:5px 0}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:11px 14px}
+.opt.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--card))}
+.opt.bad{border-color:var(--a);background:color-mix(in srgb,var(--a) 14%,var(--card))}
+.fb{margin-top:12px;padding:12px 14px;border-radius:8px;background:color-mix(in srgb,var(--hl) 22%,var(--card))}
+.fb p{margin:6px 0}
+.qn{color:var(--mute);margin:0 0 4px;font-size:14px}
+.small{font-size:14px;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>STEM<mark>Lab</mark></h1>
+<p class="tag">A collection of interactive science experiments designed to make difficult concepts easier to understand.</p>
+<nav id="tabs" role="tablist">
+<button data-t="proj" class="on">Projectile</button><button data-t="orb">Orbit</button><button data-t="frc">Forces</button><button data-t="quiz">Check your thinking</button>
+</nav>
+
+<section id="proj" class="on"><div class="lab"><div class="col">
+ <div class="card"><canvas id="pc" data-h="340" aria-label="Projectile path"></canvas>
+ <canvas id="pg" data-h="140" aria-label="Velocity components over time"></canvas>
+ <p class="small" style="margin:6px 0 0">Click or drag the lower graph to scrub through the flight.</p></div>
+ <div class="card try"><h3>Try this</h3>
+ <p>Set the angle to 30°, note the range, then try 60°. Why do they match? What angle gives the most distance?</p>
+ <p>Turn air drag up. Is the best angle still 45°? Why does the path stop being symmetric?</p></div></div>
+ <div class="card"><h2>Throw something</h2><div id="pctl"></div>
+ <div class="row"><button id="pgo">Pause</button><button id="prs">Replay</button></div>
+ <div class="kv" id="pkv"></div></div></div></section>
+
+<section id="orb"><div class="lab"><div class="col">
+ <div class="card"><canvas id="oc" data-h="380" aria-label="Orbit around a planet"></canvas>
+ <canvas id="og" data-h="110" aria-label="Energy error over time"></canvas>
+ <p class="small" style="margin:6px 0 0">Lower graph: how much the total energy has drifted. It should stay at zero.</p></div>
+ <div class="card try"><h3>Try this</h3>
+ <p>Launch at 1.0 for a circle, then 1.2 for an ellipse. Where is it moving fastest, and why?</p>
+ <p>Switch to Euler and watch the orbit spiral out. The physics did not change, only the maths we used to step forward in time.</p></div></div>
+ <div class="card"><h2>Launch a satellite</h2><div id="octl"></div>
+ <div class="row"><button id="om">Method: Leapfrog</button><button id="ors">Relaunch</button></div>
+ <div class="kv" id="okv"></div>
+ <p class="small">Units: planet gravity pull = 1, start distance = 1. Circular orbit speed is 1. Escape speed is about 1.41.</p></div></div></section>
+
+<section id="frc"><div class="lab"><div class="col">
+ <div class="card"><canvas id="fc" data-h="320" aria-label="Block on a ramp with force arrows"></canvas>
+ <canvas id="fg" data-h="140" aria-label="Acceleration against angle"></canvas>
+ <p class="small" style="margin:6px 0 0">Click the lower graph to set the ramp angle.</p></div>
+ <div class="card try"><h3>Try this</h3>
+ <p>With friction at 0.4, raise the angle slowly. At what angle does the block start to move? Check it against atan(0.4).</p>
+ <p>Double the mass. Does the acceleration change? Why not?</p></div></div>
+ <div class="card"><h2>Ramp and friction</h2><div id="fctl"></div>
+ <div class="row"><button id="frs">Reset block</button></div>
+ <div class="kv" id="fkv"></div>
+ <p class="small">Pink: weight. Teal: normal force. Dark: friction. Dashed: net force.</p></div></div></section>
+
+<section id="quiz"><div class="card" style="max-width:720px"><div id="qbox"></div></div></section>
+<footer class="small" style="margin-top:28px">Made by Asma Areesha Hanifi</footer>
+</div>
+<script>
+const $=s=>document.querySelector(s),FONT='"Atkinson Hyperlegible",system-ui,sans-serif';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const nice=v=>{const p=10**Math.floor(Math.log10(v)),n=v/p;return(n<1.5?1:n<3.5?2:n<7.5?5:10)*p};
+const cv={};
+function prep(id){const c=$('#'+id),r=devicePixelRatio||1,w=c.clientWidth||700,h=+c.dataset.h;c.width=w*r;c.height=h*r;c.style.height=h+'px';const x=c.getContext('2d');x.setTransform(r,0,0,r,0,0);x.W=w;x.H=h;cv[id]=x;return x}
+function arrow(x,X,Y,dx,dy,col,t){const l=Math.hypot(dx,dy);if(l<3)return;x.strokeStyle=x.fillStyle=col;x.lineWidth=2.5;x.beginPath();x.moveTo(X,Y);x.lineTo(X+dx,Y+dy);x.stroke();const a=Math.atan2(dy,dx);x.beginPath();x.moveTo(X+dx,Y+dy);x.lineTo(X+dx-10*Math.cos(a-.4),Y+dy-10*Math.sin(a-.4));x.lineTo(X+dx-10*Math.cos(a+.4),Y+dy-10*Math.sin(a+.4));x.fill();if(t){x.font='700 13px '+FONT;x.fillText(t,X+dx+6,Y+dy-6)}}
+function txt(x,t,X,Y,col,al){x.font='13px '+FONT;x.fillStyle=col||css('--mute');x.textAlign=al||'left';x.fillText(t,X,Y);x.textAlign='left'}
+function slider(host,items,cb){$(host).innerHTML=items.map(i=>`<label for="${i[0]}">${i[1]}<output id="${i[0]}o"></output></label><input type="range" id="${i[0]}" min="${i[2]}" max="${i[3]}" step="${i[4]}" value="${i[5]}">`).join('');
+ items.forEach(i=>{const e=$('#'+i[0]),o=$('#'+i[0]+'o'),f=()=>{o.textContent=(+e.value).toFixed(i[4]<1?(i[4]<.1?2:1):0)+i[6];};f();e.oninput=()=>{f();cb(i[0],+e.value)}})}
+function setv(id,v){const e=$('#'+id);e.value=v;e.dispatchEvent(new Event('input'))}
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- Projectile ---------- */
+const P={v:22,a:50,h:0,g:9.81,k:0,t:0,pts:[],pause:still,dt:.004};
+slider('#pctl',[['pv','Launch speed',2,50,1,22,' m/s'],['pa','Angle',0,90,1,50,'°'],['ph','Start height',0,40,1,0,' m'],['pgv','Gravity',1,25,.01,9.81,' m/s²'],['pk','Air drag',0,.05,.001,0,'']],(id,v)=>{({pv:'v',pa:'a',ph:'h',pgv:'g',pk:'k'})[id];P[({pv:'v',pa:'a',ph:'h',pgv:'g',pk:'k'})[id]]=v;simP();P.t=0});
+function simP(){const{dt}=P,r=P.a*Math.PI/180;let x=0,y=P.h,vx=P.v*Math.cos(r),vy=P.v*Math.sin(r),t=0;const pts=[[x,y,vx,vy,0]],f=(a,b)=>{const s=Math.hypot(a,b);return[-P.k*s*a,-P.g-P.k*s*b]};
+ while(t<90){const[a1,b1]=f(vx,vy),[a2,b2]=f(vx+a1*dt/2,vy+b1*dt/2),[a3,b3]=f(vx+a2*dt/2,vy+b2*dt/2),[a4,b4]=f(vx+a3*dt,vy+b3*dt);
+  x+=dt/6*(vx+2*(vx+a1*dt/2)+2*(vx+a2*dt/2)+vx+a3*dt);y+=dt/6*(vy+2*(vy+b1*dt/2)+2*(vy+b2*dt/2)+vy+b3*dt);
+  vx+=dt/6*(a1+2*a2+2*a3+a4);vy+=dt/6*(b1+2*b2+2*b3+b4);t+=dt;
+  if(y<0){y=0;pts.push([x,y,vx,vy,t]);break}pts.push([x,y,vx,vy,t])}
+ P.pts=pts;P.T=t;const vy0=P.v*Math.sin(r),vx0=P.v*Math.cos(r);P.vT=(vy0+Math.sqrt(vy0*vy0+2*P.g*P.h))/P.g;P.vR=vx0*P.vT;P.vP=P.h+(vy0>0?vy0*vy0/(2*P.g):0);
+ P.pk=Math.max(...pts.map(p=>p[1]));const e=pts[pts.length-1];
+ $('#pkv').innerHTML=`<span>Range</span><b>${e[0].toFixed(1)} m</b><span>Peak height</span><b>${P.pk.toFixed(1)} m</b><span>Time in air</span><b>${P.T.toFixed(2)} s</b><span>Range with no air</span><b>${P.vR.toFixed(1)} m</b>`}
+function drawP(){const x=cv.pc||prep('pc'),W=x.W,H=x.H;x.clearRect(0,0,W,H);const xm=Math.max(P.vR,P.pts[P.pts.length-1][0],10)*1.08,ym=Math.max(P.vP,P.pk,P.h,5)*1.3,s=Math.min((W-70)/xm,(H-50)/ym),X0=48,Y0=H-28,sx=v=>X0+v*s,sy=v=>Y0-v*s;
+ x.strokeStyle=css('--line');x.lineWidth=1;const st=nice(Math.max(xm,ym*1.5)/7);
+ for(let v=0;v<=xm;v+=st){x.beginPath();x.moveTo(sx(v),8);x.lineTo(sx(v),Y0);x.stroke();txt(x,v,sx(v),H-10,0,'center')}
+ for(let v=0;v<=ym;v+=st){x.beginPath();x.moveTo(X0,sy(v));x.lineTo(W-8,sy(v));x.stroke();txt(x,v,X0-6,sy(v)+4,0,'right')}
+ x.strokeStyle=css('--ink');x.lineWidth=2;x.beginPath();x.moveTo(X0,Y0);x.lineTo(W-8,Y0);x.stroke();
+ const r=P.a*Math.PI/180;x.setLineDash([5,5]);x.strokeStyle=css('--mute');x.lineWidth=1.5;x.beginPath();for(let i=0;i<=80;i++){const t=P.vT*i/80,px=P.v*Math.cos(r)*t,py=P.h+P.v*Math.sin(r)*t-.5*P.g*t*t;i?x.lineTo(sx(px),sy(py)):x.moveTo(sx(px),sy(py))}x.stroke();x.setLineDash([]);
+ const n=P.pts.length,i=Math.max(0,Math.min(n-1,Math.floor(P.t/P.dt))),pp=P.pts;x.lineWidth=3;x.strokeStyle=css('--a');x.beginPath();for(let j=0;j<=i;j+=4)j?x.lineTo(sx(pp[j][0]),sy(pp[j][1])):x.moveTo(sx(pp[j][0]),sy(pp[j][1]));x.stroke();
+ const b=pp[i];x.fillStyle=css('--a');x.beginPath();x.arc(sx(b[0]),sy(b[1]),8,0,7);x.fill();arrow(x,sx(b[0]),sy(b[1]),b[2]*3,0,css('--b'),'vx');arrow(x,sx(b[0]),sy(b[1]),0,-b[3]*3,css('--ink'),'vy');
+ txt(x,'dashed = no air',W-120,22);txt(x,'metres',W-8,H-28,0,'right')}
+function drawPG(){const x=cv.pg||prep('pg'),W=x.W,H=x.H;x.clearRect(0,0,W,H);const pp=P.pts,m=Math.max(P.v,5)*1.1,sx=t=>40+(W-52)*t/P.T,sy=v=>H/2-(H/2-14)*v/m;
+ x.strokeStyle=css('--line');x.lineWidth=1;x.beginPath();x.moveTo(40,sy(0));x.lineTo(W-12,sy(0));x.stroke();txt(x,'0',34,sy(0)+4,0,'right');txt(x,'m/s',2,14);txt(x,'seconds →',W-70,H-4);
+ [[2,css('--b'),'vx (sideways)'],[3,css('--ink'),'vy (up/down)']].forEach((q,k)=>{x.strokeStyle=q[1];x.lineWidth=2.5;x.beginPath();pp.forEach((p,j)=>{if(j%8&&j<pp.length-1)return;j?x.lineTo(sx(p[4]),sy(p[q[0]])):x.moveTo(sx(p[4]),sy(p[q[0]]))});x.stroke();txt(x,q[2],50+k*120,H-4,q[1])});
+ x.strokeStyle=css('--a');x.lineWidth=2;x.beginPath();x.moveTo(sx(Math.min(P.t,P.T)),6);x.lineTo(sx(Math.min(P.t,P.T)),H-18);x.stroke()}
+function scrub(id,fn){const c=$('#'+id),f=e=>{if(e.buttons||e.type==='pointerdown'){const r=c.getBoundingClientRect();fn((e.clientX-r.left)/r.width)}};c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);f(e)};c.onpointermove=f}
+scrub('pg',u=>{P.pause=true;$('#pgo').textContent='Play';P.t=Math.max(0,Math.min(1,(u*(cv.pg.W)-40)/(cv.pg.W-52)))*P.T});
+$('#pgo').onclick=()=>{P.pause=!P.pause;$('#pgo').textContent=P.pause?'Play':'Pause'};$('#prs').onclick=()=>{P.t=0;P.pause=false;$('#pgo').textContent='Pause'};
+if(still)$('#pgo').textContent='Play';
+
+/* ---------- Orbit ---------- */
+const O={v:1,m:'lf',tr:[],eh:[],on:true};
+slider('#octl',[['ov','Launch speed',.3,1.6,.01,1,'']],(i,v)=>{O.v=v;resetO()});
+function resetO(){O.x=1;O.y=0;O.vx=0;O.vy=O.v;O.tr=[];O.eh=[];O.E0=.5*O.v*O.v-1;O.dead=false}
+function acc(){const r=Math.hypot(O.x,O.y);return[-O.x/r**3,-O.y/r**3]}
+function stepO(dt){if(O.m==='lf'){let[a,b]=acc();O.vx+=a*dt/2;O.vy+=b*dt/2;O.x+=O.vx*dt;O.y+=O.vy*dt;[a,b]=acc();O.vx+=a*dt/2;O.vy+=b*dt/2}else{const[a,b]=acc();O.x+=O.vx*dt;O.y+=O.vy*dt;O.vx+=a*dt;O.vy+=b*dt}}
+$('#om').onclick=()=>{O.m=O.m==='lf'?'eu':'lf';$('#om').textContent='Method: '+(O.m==='lf'?'Leapfrog':'Euler');resetO()};$('#ors').onclick=resetO;resetO();
+function drawO(){const x=cv.oc||prep('oc'),W=x.W,H=x.H;x.clearRect(0,0,W,H);
+ if(!O.dead)for(let k=0;k<6&&!O.dead;k++){stepO(.008);if(Math.hypot(O.x,O.y)<.1)O.dead=true}
+ const r=Math.hypot(O.x,O.y),E=.5*(O.vx**2+O.vy**2)-1/r;O.tr.push([O.x,O.y]);if(O.tr.length>1800)O.tr.shift();O.eh.push((E-O.E0)/Math.max(Math.abs(O.E0),.05));if(O.eh.length>700)O.eh.shift();
+ const s=Math.min(W,H*1.4)/2/2.3,cx=W/2,cy=H/2;x.setLineDash([4,6]);x.strokeStyle=css('--mute');x.lineWidth=1.2;x.beginPath();x.arc(cx,cy,s,0,7);x.stroke();x.setLineDash([]);
+ x.strokeStyle=css('--a');x.lineWidth=2.2;x.beginPath();O.tr.forEach((p,i)=>i?x.lineTo(cx+p[0]*s,cy-p[1]*s):x.moveTo(cx+p[0]*s,cy-p[1]*s));x.stroke();
+ x.fillStyle=css('--b');x.beginPath();x.arc(cx,cy,.1*s,0,7);x.fill();x.fillStyle=css('--ink');x.beginPath();x.arc(cx+O.x*s,cy-O.y*s,6,0,7);x.fill();arrow(x,cx+O.x*s,cy-O.y*s,O.vx*50,-O.vy*50,css('--b'),'v');txt(x,'dashed circle: start distance',10,H-10);
+ const h=O.x*O.vy-O.y*O.vx,e=Math.sqrt(Math.max(0,1+2*E*h*h)),a=-1/(2*E);
+ $('#okv').innerHTML=`<span>Distance</span><b>${r.toFixed(2)}</b><span>Speed</span><b>${Math.hypot(O.vx,O.vy).toFixed(2)}</b><span>Eccentricity</span><b>${e.toFixed(2)}</b><span>Period</span><b>${E<0?(2*Math.PI*a**1.5).toFixed(1):'none'}</b><span>Result</span><b>${O.dead?'crashed':E>=0?'escapes':e<.05?'near circle':'ellipse'}</b>`;
+ const g=cv.og||prep('og'),gw=g.W,gh=g.H;g.clearRect(0,0,gw,gh);g.strokeStyle=css('--line');g.beginPath();g.moveTo(10,gh/2);g.lineTo(gw-10,gh/2);g.stroke();txt(g,'energy error (0 is perfect)',12,14);
+ g.strokeStyle=css('--a');g.lineWidth=2.5;g.beginPath();O.eh.forEach((v,i)=>{const X=10+(gw-20)*i/700,Y=gh/2-Math.max(-1,Math.min(1,v))*(gh/2-10)*3;i?g.lineTo(X,Y):g.moveTo(X,Y)});g.stroke()}
+
+/* ---------- Forces ---------- */
+const F={a:30,m:4,u:.4,t:0};
+slider('#fctl',[['fa','Ramp angle',0,75,1,30,'°'],['fm','Mass',1,10,1,4,' kg'],['fu','Friction',0,1,.01,.4,'']],(i,v)=>{F[({fa:'a',fm:'m',fu:'u'})[i]]=v;F.t=0});
+function fcalc(){const g=9.81,r=F.a*Math.PI/180,W=F.m*g,N=W*Math.cos(r),d=W*Math.sin(r),fm=F.u*N,sl=d>fm+1e-9,f=sl?fm:d;return{g,r,W,N,d,f,sl,net:sl?d-f:0,acc:sl?(d-f)/F.m:0}}
+function drawF(){const x=cv.fc||prep('fc'),W=x.W,H=x.H,c=fcalc();x.clearRect(0,0,W,H);const Lh=Math.min(W*.62,H*1.5),A=[34,H-30],B=[A[0]+Lh*Math.cos(c.r),A[1]],C=[B[0],A[1]-Lh*Math.sin(c.r)];
+ x.fillStyle=css('--line');x.strokeStyle=css('--ink');x.lineWidth=2.5;x.beginPath();x.moveTo(...A);x.lineTo(...B);x.lineTo(...C);x.closePath();x.fill();x.stroke();
+ const u=[Math.cos(c.r),-Math.sin(c.r)],n=[-Math.sin(c.r),-Math.cos(c.r)],s0=Lh*.8;if(c.sl)F.t+=.016;else F.t=0;let d=s0-60*c.acc*F.t*F.t/2;if(d<30){F.t=0;d=s0}
+ const sz=44,px=A[0]+u[0]*d+n[0]*sz/2,py=A[1]+u[1]*d+n[1]*sz/2;x.save();x.translate(px,py);x.rotate(-c.r);x.fillStyle=css('--card');x.strokeStyle=css('--ink');x.lineWidth=2.5;x.fillRect(-sz/2,-sz/2,sz,sz);x.strokeRect(-sz/2,-sz/2,sz,sz);x.restore();
+ const k=1.4;arrow(x,px,py,0,c.W*k,css('--a'),'W');arrow(x,px,py,n[0]*c.N*k,n[1]*c.N*k,css('--b'),'N');arrow(x,px,py,u[0]*c.f*k,u[1]*c.f*k,css('--ink'),'f');
+ if(c.net>.5){x.setLineDash([5,4]);arrow(x,px,py,-u[0]*c.net*k,-u[1]*c.net*k,css('--mute'),'net');x.setLineDash([])}
+ txt(x,F.a+'°',A[0]+Lh*.22,A[1]-6,css('--ink'));
+ $('#fkv').innerHTML=`<span>Weight</span><b>${c.W.toFixed(1)} N</b><span>Normal force</span><b>${c.N.toFixed(1)} N</b><span>Friction</span><b>${c.f.toFixed(1)} N</b><span>Pull down ramp</span><b>${c.d.toFixed(1)} N</b><span>Acceleration</span><b>${c.acc.toFixed(2)} m/s²</b><span>State</span><b>${c.sl?'sliding':'holding still'}</b>`;
+ const g=cv.fg||prep('fg'),gw=g.W,gh=g.H;g.clearRect(0,0,gw,gh);const gx=a=>40+(gw-52)*a/80,gy=v=>gh-22-(gh-34)*v/9.81;g.strokeStyle=css('--line');g.lineWidth=1;g.beginPath();g.moveTo(40,gy(0));g.lineTo(gw-12,gy(0));g.stroke();txt(g,'m/s²',2,14);txt(g,'angle →',gw-60,gh-4);txt(g,'0°',40,gh-4,0,'center');txt(g,'80°',gx(80),gh-4,0,'right');
+ const th=Math.atan(F.u)/R;g.setLineDash([4,4]);g.strokeStyle=css('--mute');g.beginPath();g.moveTo(gx(th),8);g.lineTo(gx(th),gy(0));g.stroke();g.setLineDash([]);txt(g,'starts sliding',gx(th)+5,22);
+ g.strokeStyle=css('--a');g.lineWidth=3;g.beginPath();for(let a=0;a<=80;a++){const r=a*R,v=Math.max(0,9.81*(Math.sin(r)-F.u*Math.cos(r)));a?g.lineTo(gx(a),gy(v)):g.moveTo(gx(a),gy(v))}g.stroke();g.fillStyle=css('--ink');g.beginPath();g.arc(gx(F.a),gy(c.acc),7,0,7);g.fill()}
+const R=Math.PI/180;scrub('fg',u=>{const a=Math.round(Math.max(0,Math.min(75,((u*cv.fg.W)-40)/(cv.fg.W-52)*80)));setv('fa',a)});$('#frs').onclick=()=>{F.t=0};
+
+/* ---------- Quiz ---------- */
+const M={hv:['Sideways speed changes falling','Up-down motion and sideways motion run independently. Gravity decides the fall; sideways speed only decides how far it travels.'],
+vz:['Zero speed means zero acceleration','At the top the velocity is momentarily zero, but it is still changing. Acceleration is that change, and gravity has not switched off.'],
+fm:['Forces point the way things move','A force changes velocity. It can point with, against, or across the motion.'],
+ng:['There is no gravity up there','At 400 km gravity is still around 90% of its strength at the surface. The satellite is in free fall, not free of gravity.'],
+cf:['A centrifugal force balances gravity','Seen from outside, only gravity acts. Centrifugal force appears only if you describe things from the rotating frame.'],
+nw:['Normal force equals weight','The normal force only cancels the part of the weight pressing into the surface: mg cos θ. On a slope it is smaller than mg.'],
+sp:['Faster now means faster forever','Speeding up raises the far side of the orbit. At that high point the satellite moves slower than it did before the burn.'],
+lin:['Everything scales in proportion','Range grows with speed squared, so doubling the speed gives four times the range.']};
+const Q=[
+{q:'You drop one ball and, at the same moment, fire another one sideways from the same height. Which hits the ground first?',o:[['The dropped ball','hv'],['The fired ball','hv'],['They land together',0]],w:'Both start with zero vertical speed and feel the same gravity, so they fall together. The fired ball just lands farther away.',lab:['proj',{pv:15,pa:0,ph:20}]},
+{q:'A ball is thrown upward. At the very top of its flight, ignoring air, what is its acceleration?',o:[['Zero, because it stops for an instant','vz'],['9.8 m/s² downward',0],['9.8 m/s² upward, still carrying it','fm']],w:'Gravity pulls with the same strength the whole time. Watch vy on the graph: it passes through zero with a steady slope.',lab:['proj',{pv:20,pa:80,ph:0}]},
+{q:'Why does a satellite 400 km up not fall to Earth?',o:[['Gravity is too weak up there','ng'],['It is falling, but moves sideways so fast that the ground curves away beneath it',0],['Centrifugal force cancels gravity so nothing pulls on it','cf']],w:'Orbiting is falling and missing. Slow the launch speed in the lab and it spirals into the planet.',lab:['orb',{ov:1}]},
+{q:'A block sits on a ramp tilted at 30°. Compared with its weight mg, the normal force is…',o:[['Equal to mg','nw'],['Smaller than mg',0],['Larger than mg','nw']],w:'Only the part of the weight pushing into the ramp is balanced: N = mg cos 30° ≈ 0.87 mg.',lab:['frc',{fa:30}]},
+{q:'A satellite on a circular orbit fires its engine briefly, forward. What happens next?',o:[['It circles faster, at the same height','sp'],['It swings out onto an ellipse, and is slower at the highest point',0],['It is thrown straight out of orbit','sp']],w:'The burn adds energy, so the orbit grows. Try a launch speed of 1.2 and compare the speeds at the near and far points.',lab:['orb',{ov:1.2}]},
+{q:'You double a projectile’s launch speed (same angle, no air). Its range becomes…',o:[['2 times as far','lin'],['4 times as far',0],['1.4 times as far','lin']],w:'Both the time in the air and the horizontal speed double, so the range is multiplied by 4. Note the range at 20 m/s, then at 40.',lab:['proj',{pv:20,pa:45,ph:0,pk:0}]}];
+let qi=0,miss={},hit=0;
+function showQ(){const b=$('#qbox');if(qi>=Q.length){const k=Object.keys(miss);b.innerHTML=`<h2>You got ${hit} of ${Q.length} first time</h2>`+(k.length?'<p>Ideas worth a second look:</p>'+k.map(t=>`<div class="fb"><b>${M[t][0]}</b> (${miss[t]}×)<p>${M[t][1]}</p></div>`).join(''):'<p>No misconceptions flagged. Try changing the numbers in the labs and predicting before you look.</p>')+'<div class="row"><button id="qr">Start again</button></div>';$('#qr').onclick=()=>{qi=0;miss={};hit=0;showQ()};return}
+ const q=Q[qi];b.innerHTML=`<p class="qn">Question ${qi+1} of ${Q.length}</p><h2>${q.q}</h2>`+q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o[0]}</button>`).join('')+'<div id="fb"></div>';
+ let tried=false;b.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{if(b.dataset.done==qi)return;b.dataset.done=qi;const o=q.o[+el.dataset.i],ok=o[1]===0;if(ok){if(!tried)hit++}else{miss[o[1]]=(miss[o[1]]||0)+1;tried=true}
+  b.querySelectorAll('.opt').forEach((e,i)=>{if(q.o[i][1]===0)e.classList.add('good');else if(e===el)e.classList.add('bad')});
+  $('#fb').innerHTML=`<div class="fb">${ok?'':`<p><b>${M[o[1]][0]}.</b> ${M[o[1]][1]}</p>`}<p><b>${ok?'Yes. ':'The answer: '}</b>${q.w}</p></div><div class="row"><button id="qt">Try it in the lab</button><button id="qn2">${qi<Q.length-1?'Next question':'See results'}</button></div>`;
+  $('#qt').onclick=()=>{go(q.lab[0]);Object.entries(q.lab[1]).forEach(([k,v])=>setv(k,v))};$('#qn2').onclick=()=>{qi++;showQ()}})}
+showQ();
+
+/* ---------- Tabs and loop ---------- */
+let cur='proj';
+function go(t){cur=t;document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));Object.keys(cv).forEach(k=>delete cv[k]);scrollTo({top:0})}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
+addEventListener('resize',()=>Object.keys(cv).forEach(k=>delete cv[k]));
+simP();let last=performance.now();
+(function loop(now){const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
+ if(cur==='proj'){if(!P.pause){P.t+=dt;if(P.t>P.T+.8)P.t=0}drawP();drawPG()}
+ else if(cur==='orb')drawO();else if(cur==='frc')drawF();
+ requestAnimationFrame(loop)})(last);
+</script>
+</body>
+</html>
